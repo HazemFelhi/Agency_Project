@@ -1,0 +1,39 @@
+---
+- hosts: jenkins_server
+  become: true
+  gather_facts: false
+  tasks:
+    - name: Update apt pack manager repo cache
+      ansible.builtin.apt:
+        update_cache: yes
+
+    - name: Install Java 17
+      ansible.builtin.apt:
+        name: 
+          - openjdk-17-jdk
+          - openjdk-17-jre
+
+    - name: ensure the jenkins apt repo key is installed
+      ansible.builtin.apt_key:
+        url: https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key
+        state: present
+
+    - name: ensure the repo is configured
+      ansible.builtin.apt_repository:
+        repo: deb https://pkg.jenkins.io/debian-stable binary/
+        state: present
+
+    - name: ensure jenkins is installed
+      ansible.builtin.apt:
+        name: jenkins
+        update_cache: yes
+
+    - name: ensure jenkins in running
+      ansible.builtin.service:
+        name: jenkins
+        state: started
+    
+
+      
+
+    

@@ -1,0 +1,43 @@
+---
+- hosts: jenkins_server
+  become: true
+  gather_facts: false
+  tasks:
+    - name: Update apt pack manager repo cache
+      ansible.builtin.apt:
+        update_cache: yes
+
+    - name: Install needed tools for Docker
+      ansible.builtin.apt:
+        name: 
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - software-properties-common
+        state: present
+        update_cache: yes
+        force_apt_get: yes
+
+    - name: Add Docker GPG key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Add Docker repository
+      apt_repository:
+        repo: 'deb [arch=amd64] https://download.docker.com/linux/ubuntu noble stable'
+        state: present
+
+    - name: Install Docker
+      ansible.builtin.apt:
+        name: docker-ce
+        state: present
+
+    - name: Add user to the docker group
+      user:
+        name: "ubuntu"  # Uses the currently logged-in user
+        groups: docker
+        append: yes
+      become: true
+
+    
