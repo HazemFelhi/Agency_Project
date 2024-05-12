@@ -33,7 +33,7 @@ pipeline{
             steps {
                 script {
                     // Define the path to your Dockerfile
-                    def dockerfilePath = '/var/lib/jenkins/workspace/Jenkins_CI/Brands/Dockerfile'
+                    def dockerfilePath = 'Agency_Project/Brands/Dockerfile'
                     
                     // Build Docker image using the specified Dockerfile path
                     docker.build("${IMAGE_NAME}", '-f ' + dockerfilePath)
