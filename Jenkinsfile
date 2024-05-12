@@ -7,7 +7,7 @@ pipeline{
 
             steps{
                 script{
-                    cleanWS()
+                    cleanWs()
                 }
             }
 
