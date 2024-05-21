@@ -88,8 +88,8 @@ pipeline {
         }
         stage('Build Docker Images') {
             steps {
-                sh 'docker build -t creator ./Creators/Dockerfile'
-                sh 'docker build -t brand ./Brands/Dockerfile'
+                sh 'docker build -t creator ./Creators'
+                sh 'docker build -t brand ./Brands'
             }
         }
         stage('Push Images') {
