@@ -31,11 +31,14 @@ pipeline{
             }
         }
 
-        stage('Build') {
+        stages {
+        stage('Install Dependencies') {
             steps {
-                sh 'npm install'
+                dir('/var/lib/jenkins/workspace/Jenkins_CI') {
+                    sh 'npm install'
+                }
             }
-        }  
+        } 
     
             
         stage('Test') {
