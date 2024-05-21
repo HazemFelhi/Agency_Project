@@ -9,6 +9,7 @@ pipeline {
         IMAGE_TAG = "${BUILD_NUMBER}"
         IMAGE_NAME = "${DOCKERHUB_USERNAME}/${APP_NAME}"
         REGISTER_CREDS = 'dockerhub'
+        SCANNER_HOME = tool 'sonarqube'
     }
     stages {
         stage("CleanUp Workspace") {
@@ -37,7 +38,7 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 withSonarQubeEnv(installationName: 'sonarqube', credentialsId: 'sonarCreds') {
-                    sh 'sonar-scanner -Dsonar.projectName=Agency_Project' 
+                    sh '${SCANNER_HOME}/bin/sonar-scanner -Dsonar.projectName=Agency_Project' 
                 }
             }
         }
