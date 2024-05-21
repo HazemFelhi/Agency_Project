@@ -33,7 +33,7 @@ pipeline{
 
         stage('Install Dependencies') {
             steps {
-                dir('/var/lib/jenkins/workspace/Jenkins_CI') {
+                dir('/var/lib/jenkins/workspace/Jenkins_CI/Creators') {
                     sh 'npm install'
                 }
             }
@@ -42,14 +42,16 @@ pipeline{
             
         stage('Test') {
             steps {
-                sh 'node test'
+                dir('/var/lib/jenkins/workspace/Jenkins_CI/Creators') {
+                    sh 'node test'
+                }
             }
         }
         stage('Build Docker Image') {
             steps {
                 script {
                     // Define the path to your Dockerfile
-                    def dockerfilePath = 'Agency_Project/Brands/Dockerfile'
+                    def dockerfilePath = 'Agency_Project/Creators/Dockerfile'
                     
                     // Build Docker image using the specified Dockerfile path
                     docker.build("${IMAGE_NAME}", '-f ' + dockerfilePath)
