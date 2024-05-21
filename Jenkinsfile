@@ -3,7 +3,6 @@ pipeline{
     agent any
     tools {
         nodejs 'nodejs'
-        sonarQubeScanner 'sonarqube'
     }
 
     environment{
@@ -42,35 +41,23 @@ pipeline{
             }
         } 
 
-        stage('SonarQube Code Analysis') {
+       
+       stage('SonarQube Analysis') {
             steps {
-                dir("${WORKSPACE}"){
-                // Run SonarQube analysis for Python
-                script {
-                    withSonarQubeEnv('sonarqube') {
-                        sh "echo $pwd"
-                        sh "${scannerHome}/bin/sonar-scanner"
-                    }
+                // Run SonarQube analysis
+                withSonarQubeEnv('sonarqube') { // This should match the name of the SonarQube server configuration in Jenkins
+                    sh 'sonar-scanner'
                 }
             }
-            }
-       }
-       stage("SonarQube Quality Gate Check") {
+        }
+        stage('Quality Gate') {
             steps {
-                script {
-                def qualityGate = waitForQualityGate()
-                    
-                    if (qualityGate.status != 'OK') {
-                        echo "${qualityGate.status}"
-                        error "Quality Gate failed: ${qualityGateStatus}"
-                    }
-                    else {
-                        echo "${qualityGate.status}"
-                        echo "SonarQube Quality Gates Passed"
-                    }
+                // Wait for SonarQube quality gate result
+                timeout(time: 1, unit: 'HOURS') {
+                    waitForQualityGate abortPipeline: true
                 }
             }
-       }
+        }
         
         stage('Build Docker Image') {
             steps {
