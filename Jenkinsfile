@@ -2,8 +2,8 @@ pipeline{
 
     agent any
     tools {
-        nodejs "nodejs"
-        sonarQubeScanner 'sonarqube' // This should match the name you configured in Jenkins
+        nodejs 'nodejs'
+        sonarQubeScanner 'sonarqube'
     }
 
     environment{
