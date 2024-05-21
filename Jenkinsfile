@@ -1,6 +1,7 @@
 pipeline{
 
     agent any
+    tools {nodejs "nodejs"}
 
     environment{
         DOCKERHUB_USERNAME = "hazemfelhi"
@@ -27,6 +28,20 @@ pipeline{
                     url: 'https://github.com/HazemFelhi/Agency_Project.git',
                     branch: 'main'
                 }
+            }
+        }
+
+        stage('Build') {
+            steps {
+                sh 'npm install'
+                sh 'npm run build'
+            }
+        }  
+    
+            
+        stage('Test') {
+            steps {
+                sh 'node test'
             }
         }
         stage('Build Docker Image') {

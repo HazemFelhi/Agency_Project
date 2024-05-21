@@ -1,0 +1,17 @@
+{
+    "jenkins-runner.jobs": {
+        "Jenkins_CI": {
+            "isDefault": true,
+            "runWith": "jenkins-master",
+            "name": "Jenkins_CI",
+        }
+    },
+    "jenkins-runner.hostConfigs": {
+        "jenkins-master": {
+            "url": "http://3.218.254.167:8080",
+            "user": "Hazem",
+            "password": "hf123",
+            "useCrumbIssuer": true,
+        }
+    }
+}
