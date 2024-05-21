@@ -10,6 +10,8 @@ pipeline {
         IMAGE_NAME = "${DOCKERHUB_USERNAME}/${APP_NAME}"
         REGISTER_CREDS = 'dockerhub'
         SCANNER_HOME = tool 'sonarqube'
+        SNYK_INSTALLATION = 'snyk'
+        SNYK_TOKEN = 'snyk'
     }
     stages {
         stage("CleanUp Workspace") {
@@ -28,13 +30,13 @@ pipeline {
                 }
             }
         }
-        stage('Install Dependencies') {
-            steps {
-                dir('/var/lib/jenkins/workspace/Jenkins_CI/Creators') {
-                    sh 'npm install'
-                }
-            }
-        }
+        // stage('Install Dependencies') {
+        //     steps {
+        //         dir('/var/lib/jenkins/workspace/Jenkins_CI/Creators') {
+        //             sh 'npm install'
+        //         }
+        //     }
+        // }
         stage('SonarQube Analysis') {
             steps {
                 withSonarQubeEnv(installationName: 'sonarqube', credentialsId: 'sonarCreds') {
@@ -52,9 +54,32 @@ pipeline {
                     def qg = waitForQualityGate()
                     if (qg.status != 'OK') {
                         error "Pipeline aborted due to quality gate failure: ${qg.status}"
+                    }else
+                    {
+                        echo 'analysis fine'
                     }
                 }
             }
         }
+        stage('snyk_analysis') {
+      steps {
+        script {
+          echo 'Testing...'
+          try {
+            snykSecurity(
+              snykInstallation: SNYK_INSTALLATION,
+              snykTokenId: SNYK_TOKEN,
+              failOnIssues: false,
+              monitorProjectOnBuild: true,
+              additionalArguments: '--all-projects --d'
+            )
+          } catch (Exception e) {
+            currentBuild.result = 'FAILURE'
+            pipelineError = true
+            error("Error during snyk_analysis: ${e.message}")
+          }
+        }
+      }
+    }
     }
 }
