@@ -38,15 +38,36 @@ pipeline{
                 }
             }
         } 
-    
-            
-        stage('Test') {
+
+        stage('SonarQube Code Analysis') {
             steps {
-                dir('/var/lib/jenkins/workspace/Jenkins_CI/Creators') {
-                    sh 'node test'
+                dir("${WORKSPACE}"){
+                // Run SonarQube analysis for Python
+                script {
+                    withSonarQubeEnv('Sonarqube') {
+                        sh "echo $pwd"
+                        sh "${scannerHome}/bin/sonar-scanner"
+                    }
                 }
             }
-        }
+            }
+       }
+       stage("SonarQube Quality Gate Check") {
+            steps {
+                script {
+                def qualityGate = waitForQualityGate()
+                    
+                    if (qualityGate.status != 'OK') {
+                        echo "${qualityGate.status}"
+                        error "Quality Gate failed: ${qualityGateStatus}"
+                    }
+                    else {
+                        echo "${qualityGate.status}"
+                        echo "SonarQube Quality Gates Passed"
+                    }
+                }
+            }
+        
         stage('Build Docker Image') {
             steps {
                 script {
