@@ -46,7 +46,7 @@ pipeline{
             steps {
                 dir("${WORKSPACE}"){
                 script {
-                    def scannerHome = tool name: 'sonarqube', type: 'hudson.plugins.sonar.SonarRunnerInstallation'
+                    def scannerHome = tool name: 'sonarqube'
                     withSonarQubeEnv('sonarqube') {
                         sh "echo $pwd"
                         sh "${scannerHome}/bin/sonar-scanner"
