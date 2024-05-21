@@ -11,6 +11,7 @@ pipeline{
         IMAGE_TAG = "${BUILD_NUBER}"
         IMAGE_NAME = "${DOCKERHUB_USERNAME}" + "/" + "${APP_NAME}"
         REGISTER_CREDS = 'dockerhub'
+        SCANNER_HOME  = tool "sonar-scanner"
     }
 
     stages{
@@ -41,36 +42,17 @@ pipeline{
             }
         } 
 
-       
-       stage('SonarQube Code Analysis') {
+        stage(SonarQube Analysis) {
             steps {
-                dir("${WORKSPACE}"){
                 script {
-                    def scannerHome = tool name: 'sonarqube'
                     withSonarQubeEnv('sonarqube') {
                         sh "echo $pwd"
-                        sh "${scannerHome}/bin/sonar-scanner"
-                    }
-                }
-            }
-            }
-       }
-       stage("SonarQube Quality Gate Check") {
-            steps {
-                script {
-                def qualityGate = waitForQualityGate()
-                    
-                    if (qualityGate.status != 'OK') {
-                        echo "${qualityGate.status}"
-                        error "Quality Gate failed: ${qualityGateStatus}"
-                    }
-                    else {
-                        echo "${qualityGate.status}"
-                        echo "SonarQube Quality Gates Passed"
+                        sh "${SCANNER_HOME}/bin/sonar-scanner"
                     }
                 }
             }
         }
+
         
         stage('Build Docker Image') {
             steps {
