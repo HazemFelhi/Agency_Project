@@ -4,7 +4,7 @@ pipeline {
         nodejs 'nodejs'
     }
     environment {
-        DOCKERHUB_USERNAME = "hazemfelhi"
+        // DOCKERHUB_USERNAME = "hazemfelhi"
         APP_NAME = "Agency_Project"
         IMAGE_TAG = "${BUILD_NUMBER}"
         IMAGE_NAME = "${DOCKERHUB_USERNAME}/${APP_NAME}"
@@ -30,13 +30,6 @@ pipeline {
                 }
             }
         }
-        // stage('Install Dependencies') {
-        //     steps {
-        //         dir('/var/lib/jenkins/workspace/Jenkins_CI/Creators') {
-        //             sh 'npm install'
-        //         }
-        //     }
-        // }
         stage('SonarQube Analysis') {
             steps {
                 withSonarQubeEnv(installationName: 'sonarqube', credentialsId: 'sonarCreds') {
@@ -62,24 +55,47 @@ pipeline {
         //     }
         // }
         stage('snyk_analysis') {
-      steps {
-        script {
-          echo 'Testing...'
-          try {
-            snykSecurity(
-              snykInstallation: SNYK_INSTALLATION,
-              snykTokenId: SNYK_TOKEN,
-              failOnIssues: false,
-              monitorProjectOnBuild: true,
-              additionalArguments: '--all-projects --d'
-            )
-          } catch (Exception e) {
-            currentBuild.result = 'FAILURE'
-            pipelineError = true
-            error("Error during snyk_analysis: ${e.message}")
-          }
+            steps {
+                script {
+                echo 'Testing...'
+                try {
+                    snykSecurity(
+                    snykInstallation: SNYK_INSTALLATION,
+                    snykTokenId: SNYK_TOKEN,
+                    failOnIssues: false,
+                    monitorProjectOnBuild: true,
+                    additionalArguments: '--all-projects --d'
+                    )
+                } catch (Exception e) {
+                    currentBuild.result = 'FAILURE'
+                    pipelineError = true
+                    error("Error during snyk_analysis: ${e.message}")
+                }
+                }
+            }
         }
-      }
-    }
+        stage('Install Dependencies') {
+            steps {
+                dir('/var/lib/jenkins/workspace/Jenkins_CI/Creators') {
+                    sh 'npm install'
+                }
+                dir('/var/lib/jenkins/workspace/Jenkins_CI/Brands') {
+                    sh 'npm install'
+                }
+            }
+        }
+        stage('Build Docker Images') {
+            steps {
+                sh 'docker build -t creator ./Creators/Dockerfile'
+                sh 'docker build -t brand ./Brands/Dockerfile'
+            }
+        }
+        stage('Push Images') {
+            withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                sh "docker login -u $USERNAME -p $PASSWORD"
+                sh "docker push creator"
+                sh "docker push brand"
+            }
+        }
     }
 }
