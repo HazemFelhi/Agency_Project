@@ -24,19 +24,23 @@ pipeline {
         stage("Checkout SCM") {
             steps {
                 script {
-                    git credentialsId: 'github',
-                    url: 'https://github.com/HazemFelhi/Agency_Project.git',
-                    branch: 'main'
+                    git(
+                        credentialsId: 'github',
+                        url: 'https://github.com/HazemFelhi/Agency_Project.git',
+                        branch: 'main'
+                    )
                 }
             }
         }
         stage('SonarQube Analysis') {
             steps {
-                withSonarQubeEnv(installationName: 'sonarqube', credentialsId: 'sonarCreds') {
-                    sh "${SCANNER_HOME}/bin/sonar-scanner \
+                withSonarQubeEnv('sonarqube') {
+                    sh """
+                        ${SCANNER_HOME}/bin/sonar-scanner \
                         -Dsonar.projectKey=Agency_Project \
                         -Dsonar.projectName=Agency_Project \
-                        -Dsonar.projectVersion=1.0"
+                        -Dsonar.projectVersion=1.0
+                    """
                 }
             }
         }
@@ -47,9 +51,8 @@ pipeline {
         //             def qg = waitForQualityGate()
         //             if (qg.status != 'OK') {
         //                 error "Pipeline aborted due to quality gate failure: ${qg.status}"
-        //             }else
-        //             {
-        //                 echo 'analysis fine'
+        //             } else {
+        //                 echo 'Analysis fine'
         //             }
         //         }
         //     }
@@ -57,20 +60,19 @@ pipeline {
         stage('snyk_analysis') {
             steps {
                 script {
-                echo 'Testing...'
-                try {
-                    snykSecurity(
-                    snykInstallation: SNYK_INSTALLATION,
-                    snykTokenId: SNYK_TOKEN,
-                    failOnIssues: false,
-                    monitorProjectOnBuild: true,
-                    additionalArguments: '--all-projects --d'
-                    )
-                } catch (Exception e) {
-                    currentBuild.result = 'FAILURE'
-                    pipelineError = true
-                    error("Error during snyk_analysis: ${e.message}")
-                }
+                    echo 'Testing...'
+                    try {
+                        snykSecurity(
+                            snykInstallation: SNYK_INSTALLATION,
+                            snykTokenId: SNYK_TOKEN,
+                            failOnIssues: false,
+                            monitorProjectOnBuild: true,
+                            additionalArguments: '--all-projects --d'
+                        )
+                    } catch (Exception e) {
+                        currentBuild.result = 'FAILURE'
+                        error("Error during snyk_analysis: ${e.message}")
+                    }
                 }
             }
         }
@@ -91,11 +93,14 @@ pipeline {
             }
         }
         stage('Push Images') {
-            withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-                sh "docker login -u $USERNAME -p $PASSWORD"
-                sh "docker push creator"
-                sh "docker push brand"
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                    sh "docker login -u $USERNAME -p $PASSWORD"
+                    sh "docker push creator"
+                    sh "docker push brand"
+                }
             }
         }
     }
 }
+
