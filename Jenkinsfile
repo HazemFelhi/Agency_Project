@@ -41,7 +41,7 @@ pipeline {
                     sh "${SCANNER_HOME}/bin/sonar-scanner \
                         -Dsonar.projectKey=Agency_Project \
                         -Dsonar.projectName=Agency_Project \
-                        -Dsonar.projectVersion=1.0 
+                        -Dsonar.projectVersion=1.0"
                 }
             }
         }
