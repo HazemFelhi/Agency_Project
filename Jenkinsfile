@@ -31,7 +31,6 @@ pipeline{
             }
         }
 
-        stages {
         stage('Install Dependencies') {
             steps {
                 dir('/var/lib/jenkins/workspace/Jenkins_CI') {
