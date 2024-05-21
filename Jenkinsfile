@@ -96,8 +96,8 @@ pipeline {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
                     sh "docker login -u $USERNAME -p $PASSWORD"
-                    sh "docker tag creator:v0 hazemfelhi/creator:v0"
-                    sh "docker tag brand:v0 hazemfelhi/brand:v0"
+                    sh "docker tag creator hazemfelhi/creator:v0"
+                    sh "docker tag brand hazemfelhi/brand:v0"
                     sh "docker push hazemfelhi/brand:v0"
                     sh "docker push hazemfelhi/creator:v0"
                 }
