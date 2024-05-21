@@ -38,7 +38,10 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 withSonarQubeEnv(installationName: 'sonarqube', credentialsId: 'sonarCreds') {
-                    sh '${SCANNER_HOME}/bin/sonar-scanner \ -Dsonar.projectName=Agency_Project \ -Dsonar.projectKey=Agency_Project' 
+                    sh "${SCANNER_HOME}/bin/sonar-scanner \
+                        -Dsonar.projectKey=Agency_Project \
+                        -Dsonar.projectName=Agency_Project \
+                        -Dsonar.projectVersion=1.0 
                 }
             }
         }
