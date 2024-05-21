@@ -45,8 +45,8 @@ pipeline{
        stage('SonarQube Code Analysis') {
             steps {
                 dir("${WORKSPACE}"){
-                // Run SonarQube analysis for Python
                 script {
+                    def scannerHome = tool name: 'sonarqube', type: 'hudson.plugins.sonar.SonarRunnerInstallation'
                     withSonarQubeEnv('sonarqube') {
                         sh "echo $pwd"
                         sh "${scannerHome}/bin/sonar-scanner"
