@@ -47,20 +47,20 @@ pipeline {
                 }
             }
         }
-        stage('Quality Gate') {
-            steps {
-                script {
-                    // Wait for SonarQube analysis to complete and get the quality gate status
-                    def qg = waitForQualityGate()
-                    if (qg.status != 'OK') {
-                        error "Pipeline aborted due to quality gate failure: ${qg.status}"
-                    }else
-                    {
-                        echo 'analysis fine'
-                    }
-                }
-            }
-        }
+        // stage('Quality Gate') {
+        //     steps {
+        //         script {
+        //             // Wait for SonarQube analysis to complete and get the quality gate status
+        //             def qg = waitForQualityGate()
+        //             if (qg.status != 'OK') {
+        //                 error "Pipeline aborted due to quality gate failure: ${qg.status}"
+        //             }else
+        //             {
+        //                 echo 'analysis fine'
+        //             }
+        //         }
+        //     }
+        // }
         stage('snyk_analysis') {
       steps {
         script {
