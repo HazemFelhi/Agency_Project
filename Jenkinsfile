@@ -1,7 +1,10 @@
 pipeline{
 
     agent any
-    tools {nodejs "nodejs"}
+    tools {
+        nodejs "nodejs"
+        sonarQubeScanner 'sonarqube' // This should match the name you configured in Jenkins
+    }
 
     environment{
         DOCKERHUB_USERNAME = "hazemfelhi"
@@ -44,7 +47,7 @@ pipeline{
                 dir("${WORKSPACE}"){
                 // Run SonarQube analysis for Python
                 script {
-                    withSonarQubeEnv('Sonarqube') {
+                    withSonarQubeEnv('sonarqube') {
                         sh "echo $pwd"
                         sh "${scannerHome}/bin/sonar-scanner"
                     }
