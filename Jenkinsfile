@@ -119,20 +119,20 @@ pipeline {
             }
         }
     }
-    post {
-        always {
-            // Clean up workspace and remove Docker images
-            cleanWs()
-            sh 'docker system prune -af'
-        }
+    // post {
+    //     always {
+    //         // Clean up workspace and remove Docker images
+    //         cleanWs()
+    //         sh 'docker system prune -af'
+    //     }
 
-        success {
-            echo 'Pipeline completed successfully!'
-        }
+    //     success {
+    //         echo 'Pipeline completed successfully!'
+    //     }
 
-        failure {
-            echo 'Pipeline failed.'
-        }
-    }
+    //     failure {
+    //         echo 'Pipeline failed.'
+    //     }
+    // }
 }
 
