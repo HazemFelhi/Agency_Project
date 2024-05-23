@@ -6,7 +6,10 @@ pipeline {
     environment {
         // DOCKERHUB_USERNAME = "hazemfelhi"
         APP_NAME = "Agency_Project"
-        IMAGE_TAG = "${BUILD_NUMBER}"
+        IMAGE_REG = "hazemfelhi"
+        IMAGE_TAG = "v1"
+        IMAGE_REPO1 = "creator"
+        IMAGE_REPO2 = "brand"
         IMAGE_NAME = "${DOCKERHUB_USERNAME}/${APP_NAME}"
         REGISTER_CREDS = 'dockerhub'
         SCANNER_HOME = tool 'sonarqube'
@@ -88,20 +91,40 @@ pipeline {
         }
         stage('Build Docker Images') {
             steps {
-                sh 'docker build -t creator ./Creators'
-                sh 'docker build -t brand ./Brands'
+                sh "docker build -t $IMAGE_REPO1 ./Creators"
+                sh "docker build -t $IMAGE_REPO2 ./Brands"
+                sh "docker tag $IMAGE_REPO1 $IMAGE_REG/$IMAGE_REPO1:$IMAGE_TAG"
+                sh "docker tag $IMAGE_REPO2 $IMAGE_REG/$IMAGE_REPO2:$IMAGE_TAG"
+            }
+        }
+        stage('Trivy Image Scan') {
+            steps {
+                sh "trivy image $IMAGE_REG/$IMAGE_REPO1:$IMAGE_TAG > trivy.txt"
+                sh "trivy image $IMAGE_REG/$IMAGE_REPO2:$IMAGE_TAG > trivy.txt"
             }
         }
         stage('Push Images') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
                     sh "docker login -u $USERNAME -p $PASSWORD"
-                    sh "docker tag creator hazemfelhi/creator:v0"
-                    sh "docker tag brand hazemfelhi/brand:v0"
-                    sh "docker push hazemfelhi/brand:v0"
-                    sh "docker push hazemfelhi/creator:v0"
+                    sh "docker push $IMAGE_REG/$IMAGE_REPO1:$IMAGE_TAG"
+                    sh "docker push $IMAGE_REG/$IMAGE_REPO2:$IMAGE_TAG"
                 }
             }
+        }
+        post {
+        always {
+            // Clean up workspace and remove Docker images
+            cleanWs()
+            sh 'docker system prune -af'
+        }
+
+        success {
+            echo 'Pipeline completed successfully!'
+        }
+
+        failure {
+            echo 'Pipeline failed.'
         }
     }
 }
