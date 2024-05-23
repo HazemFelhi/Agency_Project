@@ -7,7 +7,7 @@ pipeline {
         // DOCKERHUB_USERNAME = "hazemfelhi"
         APP_NAME = "Agency_Project"
         IMAGE_REG = "hazemfelhi"
-        IMAGE_TAG = "v3"
+        IMAGE_TAG = "v4"
         IMAGE_REPO1 = "creator"
         IMAGE_REPO2 = "brand"
         IMAGE_NAME = "${DOCKERHUB_USERNAME}/${APP_NAME}"
@@ -107,14 +107,14 @@ pipeline {
                     sh '''
                         docker run --rm \
                             -v /var/run/docker.sock:/var/run/docker.sock \
-                            -v $(pwd)/trivy-cache:/root/.cache/ \
-                            aquasec/trivy:latest image --format json --exit-code 1 creator:v3 > trivy_report.json
+                            -v /var/lib/jenkins/trivy-cache:/root/.cache/ \
+                            aquasec/trivy:latest image --format json --exit-code 1 creator:v4 > trivy_report.json
                     '''
                     sh '''
                         docker run --rm \
                             -v /var/run/docker.sock:/var/run/docker.sock \
-                            -v $(pwd)/trivy-cache:/root/.cache/ \
-                            aquasec/trivy:latest image --format json --exit-code 1 brand:v3 > trivy_report.json
+                            -v /var/lib/jenkins/trivy-cache:/root/.cache/ \
+                            aquasec/trivy:latest image --format json --exit-code 1 brand:v4 > trivy_report.json
                     '''
 
                     // Check if the scan failed (non-zero exit code means vulnerabilities were found)
