@@ -7,7 +7,7 @@ pipeline {
         // DOCKERHUB_USERNAME = "hazemfelhi"
         APP_NAME = "Agency_Project"
         IMAGE_REG = "hazemfelhi"
-        IMAGE_TAG = "v2"
+        IMAGE_TAG = "v3"
         IMAGE_REPO1 = "creator"
         IMAGE_REPO2 = "brand"
         IMAGE_NAME = "${DOCKERHUB_USERNAME}/${APP_NAME}"
@@ -100,14 +100,33 @@ pipeline {
         stage('Scan with Trivy') {
             steps {
                 script {
-                    // Pull the Trivy Docker image
+                    // Pull the latest Trivy Docker image
                     sh 'docker pull aquasec/trivy:latest'
 
-                    // Run Trivy scan on the target Docker image
-                    sh "trivy image --format json --exit-code 1 $IMAGE_REPO1:$IMAGE_TAG"
-                    sh "trivy image --format json --exit-code 1 $IMAGE_REPO2:$IMAGE_TAG"
-                    // sh "docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy:latest image $IMAGE_REG/$IMAGE_REPO1:$IMAGE_TAG"
-                    // sh "docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy:latest image $IMAGE_REG/$IMAGE_REPO2:$IMAGE_TAG"
+                    // Run Trivy scan on the target Docker image and output in JSON format
+                    sh '''
+                        docker run --rm \
+                            -v /var/run/docker.sock:/var/run/docker.sock \
+                            -v $(pwd)/trivy-cache:/root/.cache/ \
+                            aquasec/trivy:latest image --format json --exit-code 1 creator:v3 > trivy_report.json
+                    '''
+                    sh '''
+                        docker run --rm \
+                            -v /var/run/docker.sock:/var/run/docker.sock \
+                            -v $(pwd)/trivy-cache:/root/.cache/ \
+                            aquasec/trivy:latest image --format json --exit-code 1 brand:v3 > trivy_report.json
+                    '''
+
+                    // Check if the scan failed (non-zero exit code means vulnerabilities were found)
+                    script {
+                        def scanResult = sh(script: 'cat trivy_report.json', returnStatus: true)
+                        if (scanResult != 0) {
+                            error("Trivy scan found vulnerabilities")
+                        }
+                    }
+
+                    // Archive the Trivy report
+                    archiveArtifacts artifacts: 'trivy_report.json', allowEmptyArchive: true
                 }
             }
         }
