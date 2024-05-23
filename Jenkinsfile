@@ -112,7 +112,8 @@ pipeline {
                 }
             }
         }
-        post {
+    }
+    post {
         always {
             // Clean up workspace and remove Docker images
             cleanWs()
