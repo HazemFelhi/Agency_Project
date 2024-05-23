@@ -79,16 +79,16 @@ pipeline {
                 }
             }
         }
-        stage('Install Dependencies') {
-            steps {
-                dir('/var/lib/jenkins/workspace/Jenkins_CI/Creators') {
-                    sh 'npm install'
-                }
-                dir('/var/lib/jenkins/workspace/Jenkins_CI/Brands') {
-                    sh 'npm install'
-                }
-            }
-        }
+        // stage('Install Dependencies') {
+        //     steps {
+        //         dir('/var/lib/jenkins/workspace/Jenkins_CI/Creators') {
+        //             sh 'npm install'
+        //         }
+        //         dir('/var/lib/jenkins/workspace/Jenkins_CI/Brands') {
+        //             sh 'npm install'
+        //         }
+        //     }
+        // }
         stage('Build Docker Images') {
             steps {
                 sh "docker build -t $IMAGE_REPO1 ./Creators"
