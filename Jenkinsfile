@@ -7,7 +7,7 @@ pipeline {
         // DOCKERHUB_USERNAME = "hazemfelhi"
         APP_NAME = "Agency_Project"
         IMAGE_REG = "hazemfelhi"
-        IMAGE_TAG = "v1"
+        IMAGE_TAG = "v2"
         IMAGE_REPO1 = "creator"
         IMAGE_REPO2 = "brand"
         IMAGE_NAME = "${DOCKERHUB_USERNAME}/${APP_NAME}"
@@ -104,8 +104,10 @@ pipeline {
                     sh 'docker pull aquasec/trivy:latest'
 
                     // Run Trivy scan on the target Docker image
-                    sh "docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy:latest image $IMAGE_REG/$IMAGE_REPO1:$IMAGE_TAG"
-                    sh "docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy:latest image $IMAGE_REG/$IMAGE_REPO2:$IMAGE_TAG"
+                    sh "trivy image --format json --exit-code 1 $IMAGE_REPO1:$IMAGE_TAG"
+                    sh "trivy image --format json --exit-code 1 $IMAGE_REPO2:$IMAGE_TAG"
+                    // sh "docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy:latest image $IMAGE_REG/$IMAGE_REPO1:$IMAGE_TAG"
+                    // sh "docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy:latest image $IMAGE_REG/$IMAGE_REPO2:$IMAGE_TAG"
                 }
             }
         }
