@@ -99,6 +99,16 @@ pipeline {
                 sh "docker tag $IMAGE_REPO2 $IMAGE_REG/$IMAGE_REPO2:$IMAGE_TAG"
             }
         }
+        stage('Prepare Cache Directory') {
+            steps {
+                script {
+                    // Ensure cache directory has correct permissions
+                    sh 'sudo mkdir -p $TRIVY_CACHE_DIR'
+                    sh 'sudo chown -R jenkins:jenkins $TRIVY_CACHE_DIR'
+                    sh 'sudo chmod -R 777 $TRIVY_CACHE_DIR'
+                }
+            }
+        }
         stage('Scan with Trivy') {
             steps {
                 script {
