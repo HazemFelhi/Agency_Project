@@ -7,7 +7,7 @@ pipeline {
         // DOCKERHUB_USERNAME = "hazemfelhi"
         APP_NAME = "Agency_Project"
         IMAGE_REG = "hazemfelhi"
-        IMAGE_TAG = "v5"
+        IMAGE_TAG = "v6"
         IMAGE_REPO1 = "creator"
         IMAGE_REPO2 = "brand"
         IMAGE_NAME = "${DOCKERHUB_USERNAME}/${APP_NAME}"
@@ -15,7 +15,7 @@ pipeline {
         SCANNER_HOME = tool 'sonarqube'
         SNYK_INSTALLATION = 'snyk'
         SNYK_TOKEN = 'snyk'
-        TRIVY_OUTPUT = "trivy_report.html"
+        TRIVY_OUTPUT = "trivy_report.json"
         TRIVY_CACHE_DIR = "/var/lib/jenkins/trivy-cache"
     }
     stages {
@@ -105,14 +105,18 @@ pipeline {
                     // Pull the Trivy image
                     sh 'docker pull aquasec/trivy:latest'
                     
-                    // Run Trivy scan
-                    sh "docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $TRIVY_CACHE_DIR:/root/.cache/ aquasec/trivy:latest image --format json --exit-code 1 $IMAGE_REG/$IMAGE_REPO1:$IMAGE_TAG"
-                    sh "docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $TRIVY_CACHE_DIR:/root/.cache/ aquasec/trivy:latest image --format json --exit-code 1 $IMAGE_REG/$IMAGE_REPO2:$IMAGE_TAG"
+                    // Run Trivy scan with explicit cache directory inside container
+                    sh """
+                    docker run --rm \
+                        -v /var/run/docker.sock:/var/run/docker.sock \
+                        -v $TRIVY_CACHE_DIR:/root/.cache/ \
+                        aquasec/trivy:latest image --cache-dir /root/.cache/ --format json --exit-code 1 $IMAGE_REG/$IMAGE_REPO1:$IMAGE_TAG > $TRIVY_OUTPUT
+                    """
                 }
             }
             post {
                 always {
-                    archiveArtifacts artifacts: 'trivy_report.html', allowEmptyArchive: true
+                    archiveArtifacts artifacts: 'trivy_report.json', allowEmptyArchive: true
                 }
             }
         }
