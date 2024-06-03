@@ -7,7 +7,7 @@ pipeline {
         // DOCKERHUB_USERNAME = "hazemfelhi"
         APP_NAME = "Agency_Project"
         IMAGE_REG = "hazemfelhi"
-        IMAGE_TAG = "v4"
+        IMAGE_TAG = "v5"
         IMAGE_REPO1 = "creator"
         IMAGE_REPO2 = "brand"
         IMAGE_NAME = "${DOCKERHUB_USERNAME}/${APP_NAME}"
@@ -106,7 +106,8 @@ pipeline {
                     sh 'docker pull aquasec/trivy:latest'
                     
                     // Run Trivy scan
-                    sh "docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $TRIVY_CACHE_DIR:/root/.cache/ aquasec/trivy:latest image --format json --exit-code 1 $DOCKER_IMAGE"
+                    sh "docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $TRIVY_CACHE_DIR:/root/.cache/ aquasec/trivy:latest image --format json --exit-code 1 $IMAGE_REG/$IMAGE_REPO1:$IMAGE_TAG"
+                    sh "docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $TRIVY_CACHE_DIR:/root/.cache/ aquasec/trivy:latest image --format json --exit-code 1 $IMAGE_REG/$IMAGE_REPO2:$IMAGE_TAG"
                 }
             }
             post {
