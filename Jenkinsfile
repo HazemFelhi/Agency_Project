@@ -15,6 +15,8 @@ pipeline {
         SCANNER_HOME = tool 'sonarqube'
         SNYK_INSTALLATION = 'snyk'
         SNYK_TOKEN = 'snyk'
+        TRIVY_OUTPUT = "trivy_report.html"
+        TRIVY_CACHE_DIR = "/var/lib/jenkins/trivy-cache"
     }
     stages {
         stage("CleanUp Workspace") {
@@ -100,33 +102,16 @@ pipeline {
         stage('Scan with Trivy') {
             steps {
                 script {
-                    // Pull the latest Trivy Docker image
+                    // Pull the Trivy image
                     sh 'docker pull aquasec/trivy:latest'
-
-                    // Run Trivy scan on the target Docker image and output in JSON format
-                    sh '''
-                        docker run --rm \
-                            -v /var/run/docker.sock:/var/run/docker.sock \
-                            -v /var/lib/jenkins/trivy-cache:/root/.cache/ \
-                            aquasec/trivy:latest image --format json --exit-code 1 creator:v4 > trivy_report.json
-                    '''
-                    sh '''
-                        docker run --rm \
-                            -v /var/run/docker.sock:/var/run/docker.sock \
-                            -v /var/lib/jenkins/trivy-cache:/root/.cache/ \
-                            aquasec/trivy:latest image --format json --exit-code 1 brand:v4 > trivy_report.json
-                    '''
-
-                    // Check if the scan failed (non-zero exit code means vulnerabilities were found)
-                    script {
-                        def scanResult = sh(script: 'cat trivy_report.json', returnStatus: true)
-                        if (scanResult != 0) {
-                            error("Trivy scan found vulnerabilities")
-                        }
-                    }
-
-                    // Archive the Trivy report
-                    archiveArtifacts artifacts: 'trivy_report.json', allowEmptyArchive: true
+                    
+                    // Run Trivy scan
+                    sh "docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $TRIVY_CACHE_DIR:/root/.cache/ aquasec/trivy:latest image --format json --exit-code 1 $DOCKER_IMAGE"
+                }
+            }
+            post {
+                always {
+                    archiveArtifacts artifacts: 'trivy_report.html', allowEmptyArchive: true
                 }
             }
         }

@@ -1,0 +1,12 @@
+---
+- hosts: jenkins_server
+  become: yes
+  tasks:
+    - name: Copy the Bash script to the EC2 instance
+      copy:
+        src: install_k8s.sh
+        dest: /tmp/install_k8s.sh
+        mode: '0755'
+
+    - name: Execute the Bash script on the EC2 instance
+      shell: /tmp/install_k8s.sh
